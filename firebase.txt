@@ -1,0 +1,74 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAzSvtrhFiPzmfbsRDKYcUdwGxbvzNIqVg",
+  authDomain: "asmcro102-eec0d.firebaseapp.com",
+  projectId: "asmcro102-eec0d",
+  storageBucket: "asmcro102-eec0d.firebasestorage.app",
+  messagingSenderId: "696849089744",
+  appId: "1:696849089744:web:cc27b0e2f0770698394ad5",
+  measurementId: "G-ZSJH2VNF4D"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+
+//! bản khác
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDaDpkUpMENtl0GfOcLf3HGayriWW-uGHU",
+  authDomain: "asmcro102-6714b.firebaseapp.com",
+  projectId: "asmcro102-6714b",
+  storageBucket: "asmcro102-6714b.firebasestorage.app",
+  messagingSenderId: "1098719307293",
+  appId: "1:1098719307293:web:906c011a0869dcd15248f4",
+  measurementId: "G-5T6K508YM1"
+};
+
+
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+id("com.google.gms.google-services") version "4.4.2" apply false
+
+
+
+plugins {
+  id("com.android.application")
+
+  // Add the Google services Gradle plugin
+  id("com.google.gms.google-services")
+
+  ...
+}
+
+dependencies {
+  // Import the Firebase BoM
+  implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
+
+
+  // TODO: Add the dependencies for Firebase products you want to use
+  // When using the BoM, don't specify versions in Firebase dependencies
+  implementation("com.google.firebase:firebase-analytics")
+
+
+  // Add the dependencies for any other desired Firebase products
+  // https://firebase.google.com/docs/android/setup#available-libraries
+}
