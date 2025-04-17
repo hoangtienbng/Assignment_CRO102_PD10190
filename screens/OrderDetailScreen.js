@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   StatusBar
 } from 'react-native';
+
 import { Feather } from '@expo/vector-icons';
 import { getDoc, doc, deleteDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
@@ -30,11 +31,12 @@ const OrderDetailScreen = ({ route, navigation }) => {
     try {
       const orderDoc = await getDoc(doc(db, 'orders', orderId));
       if (orderDoc.exists()) {
+        const orderData = orderDoc.data();
         setOrder({
           id: orderDoc.id,
-          ...orderDoc.data(),
-          createdAt: orderDoc.data().createdAt?.toDate().toLocaleDateString('vi-VN'),
-          completedAt: orderDoc.data().completedAt?.toDate().toLocaleDateString('vi-VN')
+          ...orderData,
+          createdAt: orderData.createdAt?.toDate().toLocaleDateString('vi-VN'),
+          completedAt: orderData.completedAt?.toDate().toLocaleDateString('vi-VN')
         });
       } else {
         Alert.alert("Thông báo", "Không tìm thấy đơn hàng");
@@ -196,11 +198,30 @@ const OrderDetailScreen = ({ route, navigation }) => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Thông tin khách hàng</Text>
-          <Text style={styles.infoText}>Tên: {order.customerName}</Text>
-          <Text style={styles.infoText}>SĐT: {order.phone}</Text>
-          <Text style={styles.infoText}>Địa chỉ: {order.address}</Text>
-        </View>
+  <Text style={styles.sectionTitle}>Thông tin khách hàng</Text>
+  <View style={styles.customerInfo}>
+    <View style={styles.infoRow}>
+      <Feather name="user" size={16} color="#666" />
+      <Text style={styles.infoText}>
+        Tên: {order.customer?.name || 'Không có thông tin'}
+      </Text>
+    </View>
+
+    <View style={styles.infoRow}>
+      <Feather name="phone" size={16} color="#666" />
+      <Text style={styles.infoText}>
+        SĐT: {order.customer?.phone || 'Không có thông tin'}
+      </Text>
+    </View>
+
+    <View style={styles.infoRow}>
+      <Feather name="map-pin" size={16} color="#666" />
+      <Text style={styles.infoText}>
+        Địa chỉ: {order.customer?.address || 'Không có thông tin'}
+      </Text>
+    </View>
+  </View>
+</View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sản phẩm đã đặt</Text>
@@ -364,6 +385,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
+  },
+  customerInfo: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  infoText: {
+    marginLeft: 8,
+    fontSize: 15,
+    color: '#444',
+    flex: 1,
   },
 });
 

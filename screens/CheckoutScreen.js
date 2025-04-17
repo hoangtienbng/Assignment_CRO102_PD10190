@@ -112,7 +112,7 @@ const CheckoutScreen = ({ navigation }) => {
       // Thêm đơn hàng
       const orderRef = await addDoc(collection(db, 'orders'), orderData);
   
-      // Thêm thông báo
+      // gửi thông báo lên firebase
       await addDoc(collection(db, 'notifications'), {
         userId: auth.currentUser.uid,
         title: 'Đơn hàng đã được xác nhận',

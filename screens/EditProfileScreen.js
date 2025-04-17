@@ -1,80 +1,106 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  Image,
-  ActivityIndicator
+  View, Text, StyleSheet, TextInput, TouchableOpacity, 
+  ScrollView, Alert, ActivityIndicator, Image
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { getAuth, updateProfile } from 'firebase/auth';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
-const EditProfileScreen = ({ navigation }) => {
+const EditProfileScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [userData, setUserData] = useState({
     displayName: '',
     phone: '',
+    email: '',
     address: '',
   });
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    if (route.params?.user) {
+      const { user } = route.params;
+      setUserData({
+        displayName: user.displayName || '',
+        phone: user.phone || '',
+        email: user.email || '',
+        address: user.address || '',
+      });
+      setAvatarUrl(user.avatarUrl || '');
+    }
+  }, [route.params?.user]);
 
-  const fetchUserData = async () => {
+  const pickImage = async () => {
     try {
-      const auth = getAuth();
-      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
-      
-      if (userDoc.exists()) {
-        setUserData({
-          displayName: auth.currentUser.displayName || '',
-          phone: userDoc.data().phone || '',
-          address: userDoc.data().address || '',
-        });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setAvatarUrl(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Lỗi khi tải thông tin:', error);
-      Alert.alert('Lỗi', 'Không thể tải thông tin người dùng');
+      Alert.alert('Lỗi', 'Không thể chọn ảnh. Vui lòng thử lại.');
     }
   };
 
   const handleSave = async () => {
+    if (!userData.displayName.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập họ tên');
+      return;
+    }
+  
+    setLoading(true);
+  
     try {
-      setLoading(true);
       const auth = getAuth();
-      
+      const user = auth.currentUser;
+  
+      if (!user) {
+        throw new Error('Không tìm thấy thông tin người dùng');
+      }
+  
       // Cập nhật displayName trong Authentication
-      await updateProfile(auth.currentUser, {
-        displayName: userData.displayName
+      await updateProfile(user, {
+        displayName: userData.displayName,
       });
   
       // Cập nhật thông tin trong Firestore
-      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
         displayName: userData.displayName,
         phone: userData.phone,
         address: userData.address,
-        updatedAt: new Date()
+        avatarUrl: avatarUrl,
+        updatedAt: serverTimestamp()
       });
   
-      // Quay lại màn hình trước và gửi dữ liệu mới
-      navigation.navigate('Profile', { 
-        updatedUser: {
-          displayName: userData.displayName,
-          phone: userData.phone,
-          address: userData.address
-        }
-      });
-  
+      Alert.alert(
+        'Thành công', 
+        'Thông tin đã được cập nhật',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Quay lại màn hình Profile với dữ liệu mới
+              navigation.navigate('Profile', {
+                updatedUser: {
+                  ...userData,
+                  avatarUrl: avatarUrl
+                }
+              });
+            }
+          }
+        ]
+      );
     } catch (error) {
-      console.error('Lỗi khi cập nhật:', error);
-      Alert.alert('Lỗi', 'Không thể cập nhật thông tin');
+      console.error('Error updating profile:', error);
+      Alert.alert('Lỗi', 'Không thể cập nhật thông tin. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -93,14 +119,13 @@ const EditProfileScreen = ({ navigation }) => {
       <ScrollView style={styles.content}>
         <View style={styles.avatarContainer}>
           <Image 
-            source={require('../assets/avatar2.png')} 
+            source={avatarUrl ? { uri: avatarUrl } : require('../assets/avatar2.png')}
             style={styles.avatar}
           />
-          <TouchableOpacity style={styles.changeAvatarButton}>
+          <TouchableOpacity style={styles.changeAvatarButton} onPress={pickImage}>
             <Text style={styles.changeAvatarText}>Thay đổi ảnh</Text>
           </TouchableOpacity>
         </View>
-
         <View style={styles.formGroup}>
           <Text style={styles.label}>Họ và tên</Text>
           <TextInput
@@ -108,6 +133,16 @@ const EditProfileScreen = ({ navigation }) => {
             value={userData.displayName}
             onChangeText={(text) => setUserData({...userData, displayName: text})}
             placeholder="Nhập họ và tên"
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={userData.email}
+            editable={false}
+            placeholder="Email"
           />
         </View>
 
@@ -170,23 +205,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 8,
-  },
-  changeAvatarButton: {
-    padding: 8,
-  },
-  changeAvatarText: {
-    color: '#009245',
-    fontSize: 16,
-  },
   formGroup: {
     marginBottom: 20,
   },
@@ -220,6 +238,23 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.7,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 8,
+  },
+  changeAvatarButton: {
+    padding: 8,
+  },
+  changeAvatarText: {
+    color: '#009245',
+    fontSize: 16,
   },
 });
 

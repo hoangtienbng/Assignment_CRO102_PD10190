@@ -77,14 +77,31 @@ const PendingOrdersScreen = ({ navigation }) => {
     >
       <View style={styles.orderHeader}>
         <Text style={styles.orderId}>Đơn hàng #{item.id.slice(-5)}</Text>
-        <Text 
-          style={[
-            styles.orderStatus,
-            { color: getStatusColor(item.status) }
-          ]}
-        >
+        <Text style={[styles.orderStatus, { color: getStatusColor(item.status) }]}>
           {getStatusText(item.status)}
         </Text>
+      </View>
+
+      {/* Customer Information */}
+      <View style={styles.customerInfo}>
+        <View style={styles.infoRow}>
+          <Feather name="user" size={16} color="#666" />
+          <Text style={styles.infoText}>
+            {item.customer.name}
+          </Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Feather name="phone" size={16} color="#666" />
+          <Text style={styles.infoText}>
+            {item.customer.phone}
+          </Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Feather name="map-pin" size={16} color="#666" />
+          <Text style={styles.infoText}>
+            {item.customer.address}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.orderContent}>
@@ -92,7 +109,10 @@ const PendingOrdersScreen = ({ navigation }) => {
           <Text style={styles.orderTotal}>
             Tổng tiền: {item.total.toLocaleString('vi-VN')}đ
           </Text>
-          <Text style={styles.orderDate}>{item.createdAt}</Text>
+          <Text style={styles.orderDate}>Ngày đặt: {item.createdAt}</Text>
+          <Text style={styles.paymentMethod}>
+            Thanh toán: {item.paymentMethod}
+          </Text>
         </View>
         
         <View style={styles.thumbnails}>
@@ -112,10 +132,6 @@ const PendingOrdersScreen = ({ navigation }) => {
           )}
         </View>
       </View>
-
-      <Text style={styles.deliveryInfo}>
-        Giao đến: {item.customer.address}
-      </Text>
     </TouchableOpacity>
   );
 
@@ -181,6 +197,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: '#eee',
+    elevation: 2,
   },
   orderHeader: {
     flexDirection: 'row',
@@ -194,11 +211,26 @@ const styles = StyleSheet.create({
   orderStatus: {
     fontWeight: '600',
   },
+  customerInfo: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  infoText: {
+    marginLeft: 8,
+    color: '#444',
+    flex: 1,
+  },
   orderContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
   },
   orderInfo: {
     flex: 1,
@@ -211,6 +243,11 @@ const styles = StyleSheet.create({
   },
   orderDate: {
     color: '#666',
+    marginBottom: 4,
+  },
+  paymentMethod: {
+    color: '#666',
+    fontStyle: 'italic',
   },
   thumbnails: {
     flexDirection: 'row',
@@ -237,10 +274,6 @@ const styles = StyleSheet.create({
   moreItemsText: {
     fontSize: 12,
     color: '#666',
-  },
-  deliveryInfo: {
-    color: '#666',
-    fontSize: 14,
   },
   emptyState: {
     flex: 1,

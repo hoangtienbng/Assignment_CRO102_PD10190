@@ -22,17 +22,25 @@ const ProfileScreen = ({ navigation, route }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
   
-    // Thêm useEffect để lắng nghe thay đổi từ route params
     useEffect(() => {
       if (route.params?.updatedUser) {
         setUser(prevUser => ({
           ...prevUser,
-          ...route.params.updatedUser
+          ...route.params.updatedUser,
         }));
-        // Xóa params để tránh re-render không cần thiết
-        navigation.setParams({ updatedUser: undefined });
+        // Clear params after update
+        navigation.setParams({ updatedUser: null });
       }
     }, [route.params?.updatedUser]);
+
+    useEffect(() => {
+        if (route.params?.updatedUser) {
+          setUser(prevUser => ({
+            ...prevUser,
+            ...route.params.updatedUser
+          }));
+        }
+      }, [route.params?.updatedUser]);
   
     useEffect(() => {
       const fetchUserData = async () => {
@@ -72,6 +80,7 @@ const ProfileScreen = ({ navigation, route }) => {
 
     const handleLogout = async () => {
         try {
+          const auth = getAuth(); // Get auth instance
           await signOut(auth);
           // Chuyển về màn hình Login
           navigation.reset({
@@ -103,16 +112,26 @@ const ProfileScreen = ({ navigation, route }) => {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.profileSection}>
-                    <Image source={require("../assets/avatar2.png")} style={styles.avatar} />
-                    <View style={styles.profileInfo}>
-                        <Text style={styles.userName}>{user?.displayName || "Người dùng"}</Text>
-                        <Text style={styles.userEmail}>{user?.email}</Text>
-                    </View>
-                    <TouchableOpacity style={styles.editButton}>
-                        <Feather name="edit" size={20} color="#009245" />
-                    </TouchableOpacity>
-                </View>
+            <View style={styles.profileSection}>
+  <Image 
+    source={
+      user?.avatarUrl 
+        ? { uri: user.avatarUrl }
+        : require("../assets/avatar2.png")
+    } 
+    style={styles.avatar}
+  />
+  <View style={styles.profileInfo}>
+    <Text style={styles.userName}>{user?.displayName || "Người dùng"}</Text>
+    <Text style={styles.userEmail}>{user?.email}</Text>
+  </View>
+  <TouchableOpacity 
+    style={styles.editButton}
+    onPress={() => navigation.navigate('EditProfile', { user })}
+  >
+    <Feather name="edit" size={20} color="#009245" />
+  </TouchableOpacity>
+</View>
 
                 <View style={styles.menuSection}>
     <Text style={styles.menuTitle}>Đơn hàng của tôi</Text>

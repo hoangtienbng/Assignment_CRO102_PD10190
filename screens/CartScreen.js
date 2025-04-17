@@ -36,7 +36,7 @@ const CartScreen = ({ navigation }) => {
     calculateTotal()
   }, [cartItems, selectedItems])
 
-  const fetchCartItems = async () => {
+  const fetchCartItems = async () => { //xử lý lấy dữ liệu giỏ hàng
     try {
       const auth = getAuth()
       if (!auth.currentUser) {
@@ -45,7 +45,8 @@ const CartScreen = ({ navigation }) => {
       }
 
       const userId = auth.currentUser.uid
-      const cartQuery = query(collection(db, "carts"), where("userId", "==", userId))
+      const cartQuery = query(collection(db, "carts"),
+       where("userId", "==", userId))
 
       const cartSnapshot = await getDocs(cartQuery)
       const cartData = []
